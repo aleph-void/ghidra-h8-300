@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Function starts after a return (rts / rte), for the ER-register cores (H8/300H, H8S, H8SX).
+     The prologues are GCC's: push.l ERn (01 00 6D Fn), stm.l (01 10/20/30 6D Fn) and
+     sub.l #imm,ER7 (7A 37 ...), the most common first instructions of the functions in the
+     GCC-built test programs (test/real). -->
 <patternlist>
 	<patternpairs totalbits="32" postbits="16">
 		<prepatterns>
 			<data>0x54 0x70</data> <!-- rts -->
 			<data>0x56 0x70</data> <!-- rte -->
 		</prepatterns>
-
 		<postpatterns>
-			<data>0x6D ....1111</data>
-			<data>0x01 0x00 0x6D ....0111</data> <!-- push reg32 -->
+			<data>0x01 0x00 0x6d 0xf. </data> <!-- push.l ERn -->
+			<data>0x01 0x.0 0x6d 0xf. </data> <!-- stm.l ERn-ERm,@-sp -->
+			<data>0x7a 0x37 </data>           <!-- sub.l #imm,er7 -->
 			<funcstart/>
 		</postpatterns>
 	</patternpairs>
