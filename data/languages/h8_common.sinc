@@ -38,10 +38,22 @@ define register offset=0x40 size=$(ASZ) [ pc ];
 define register offset=0x48 size=1 [ I UI H U N Z V C ];
 define register offset=0x50 size=1 [ exr ];
 define register offset=0x54 size=4 [ vbr sbr ];
-# MAC = MACH:MACL (42 significant bits); macv is the multiplier's sticky V-MULT flag
+# MAC = MACH:MACL (42 significant bits); macn, macz, macv are the multiplier's N-MULT, Z-MULT
+# and (sticky) V-MULT flags, which STMAC copies to CCR
 define register offset=0x60 size=4 [ mach macl ];
 define register offset=0x60 size=8 [ mac ];
-define register offset=0x68 size=1 [ macv ];
+define register offset=0x68 size=1 [ macn macz macv ];
+
+@if CORE == "h8s" || CORE == "sx"
+# Run-time configuration the instruction stream does not show, set per program or address
+# (Set Register Values): exrvalid = EXR is valid (interrupt control mode 2), so exception frames
+# hold EXR; macsat = MAC saturating mode (SYSCR.MACS).  Both 0 at reset.
+define register offset=0x80 size=4 contextreg;
+define context contextreg
+	exrvalid = (0,0)
+	macsat = (1,1)
+;
+@endif
 
 define pcodeop sleep;
 
@@ -141,6 +153,50 @@ macro POPEXC(t) {
 	local cc:1 = w(3); SETCCR(cc);
 	PEA(t, w);
 @endif
+}
+
+# Frames with EXR (exrvalid, and always in maximum mode): an EXR word below the CCR/PC frame
+macro PUSHEXCX(a) {
+@if MODE == "maximum"
+	PUSHEXC(a);
+@else
+	PUSHEXC(a);
+	$(SP) = $(SP) - 2; local s9:$(ASZ); DEA(s9, $(SP)); *:2 s9 = zext(exr) << 8;
+@endif
+}
+
+macro POPEXCX(t) {
+@if MODE == "maximum"
+	POPEXC(t);
+@else
+	local s9:$(ASZ); DEA(s9, $(SP)); local e9:2 = *:2 s9; $(SP) = $(SP) + 2;
+	exr = e9(1);
+	POPEXC(t);
+@endif
+}
+
+# MAC: (EAn) x (EAm) + MAC.  Non-saturating: 42-bit MACH:MACL, V-MULT when the sum leaves the
+# 42-bit range.  Saturating (macsat): MACL limited to H'80000000..H'7FFFFFFF, the LSB of MACH
+# shows V-MULT.  N-MULT and Z-MULT describe the result (section 2.2.64).
+macro MACACC(p) {
+	local s:8 = mac + sext(p);
+	local w:8 = (s << 22) s>> 22;
+	macv = macv | (w != s);
+	mac = w;
+	macn = mac s< 0; macz = mac == 0;
+}
+
+macro MACACCSAT(p) {
+	local s:8 = sext(macl) + sext(p);
+	local hi:1 = s s> 0x7fffffff;
+	local lo:1 = s s< -0x80000000;
+	local v:4 = s:4;
+	if (hi == 0) goto <nothi>; v = 0x7fffffff; <nothi>
+	if (lo == 0) goto <notlo>; v = 0x80000000; <notlo>
+	macv = macv | hi | lo;
+	macl = v;
+	mach = (mach & 0xfffffffe) | zext(macv);
+	macn = v s< 0; macz = v == 0;
 }
 
 # TRAPA #n vector: H'0010+2n (normal) or H'000020+4n (other modes); the H8SX adds VBR

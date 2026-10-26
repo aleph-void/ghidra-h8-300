@@ -34803,13 +34803,21 @@ PUSHLIST4_2_51: "er4-er7" is u2_2_0=4 { er7 = er7 - 4; local s4:$(ASZ); DEA(s4, 
 	macl = u1_rl2_0;
 	macv = 0;
 }
-:mac "@"^u2_ra6_4^"+"^","^"@"^u2_ra2_0^"+" is u1_15_0=0x160 ; u2_15_7=0xda & u2_3_3=0x0 & u2_ra2_0 & u2_ra6_4
+:mac "@"^u2_ra6_4^"+"^","^"@"^u2_ra2_0^"+" is macsat=0 & u1_15_0=0x160 ; u2_15_7=0xda & u2_3_3=0x0 & u2_ra2_0 & u2_ra6_4
 {
 	local ea0_:4 = u2_ra6_4; u2_ra6_4 = u2_ra6_4 + 2;
 	local ea0:$(ASZ); DEA(ea0, ea0_);
 	local ea1_:4 = u2_ra2_0; u2_ra2_0 = u2_ra2_0 + 2;
 	local ea1:$(ASZ); DEA(ea1, ea1_);
-	local p:4 = sext((*:2 ea0)) * sext((*:2 ea1)); mac = mac + sext(p); mac = (mac << 22) s>> 22;
+	local p:4 = sext((*:2 ea0)) * sext((*:2 ea1)); MACACC(p);
+}
+:mac "@"^u2_ra6_4^"+"^","^"@"^u2_ra2_0^"+" is macsat=1 & u1_15_0=0x160 ; u2_15_7=0xda & u2_3_3=0x0 & u2_ra2_0 & u2_ra6_4
+{
+	local ea0_:4 = u2_ra6_4; u2_ra6_4 = u2_ra6_4 + 2;
+	local ea0:$(ASZ); DEA(ea0, ea0_);
+	local ea1_:4 = u2_ra2_0; u2_ra2_0 = u2_ra2_0 + 2;
+	local ea1:$(ASZ); DEA(ea1, ea1_);
+	local p:4 = sext((*:2 ea0)) * sext((*:2 ea1)); MACACCSAT(p);
 }
 :mov.b "#"^u1_7_0^","^u1_rb11_8 is u1_15_12=0xf & u1_7_0 & u1_rb11_8
 {
@@ -60553,25 +60561,45 @@ PUSHLIST4_2_51: "er4-er7" is u2_2_0=4 { er7 = er7 - 4; local s4:$(ASZ); DEA(s4, 
 	N = r s< 0; Z = r == 0;
 	ABS32_3_22 = r;
 }
-:rte  is u1_15_0=0x5670
+:rte  is exrvalid=0 & u1_15_0=0x5670
 {
 	local t:$(ASZ); POPEXC(t); return [t];
 }
-:rte^"/l" POPLIST1_1_45 is u1_15_3=0xac0 & POPLIST1_1_45
+:rte  is exrvalid=1 & u1_15_0=0x5670
+{
+	local t:$(ASZ); POPEXCX(t); return [t];
+}
+:rte^"/l" POPLIST1_1_45 is exrvalid=0 & u1_15_3=0xac0 & POPLIST1_1_45
 {
 	local t:$(ASZ); POPEXC(t); return [t];
 }
-:rte^"/l" POPLIST2_1_46 is u1_15_3=0xac2 & POPLIST2_1_46
+:rte^"/l" POPLIST1_1_45 is exrvalid=1 & u1_15_3=0xac0 & POPLIST1_1_45
+{
+	local t:$(ASZ); POPEXCX(t); return [t];
+}
+:rte^"/l" POPLIST2_1_46 is exrvalid=0 & u1_15_3=0xac2 & POPLIST2_1_46
 {
 	local t:$(ASZ); POPEXC(t); return [t];
 }
-:rte^"/l" POPLIST3_1_47 is u1_15_3=0xac4 & POPLIST3_1_47
+:rte^"/l" POPLIST2_1_46 is exrvalid=1 & u1_15_3=0xac2 & POPLIST2_1_46
+{
+	local t:$(ASZ); POPEXCX(t); return [t];
+}
+:rte^"/l" POPLIST3_1_47 is exrvalid=0 & u1_15_3=0xac4 & POPLIST3_1_47
 {
 	local t:$(ASZ); POPEXC(t); return [t];
 }
-:rte^"/l" POPLIST4_1_48 is u1_15_3=0xac6 & POPLIST4_1_48
+:rte^"/l" POPLIST3_1_47 is exrvalid=1 & u1_15_3=0xac4 & POPLIST3_1_47
+{
+	local t:$(ASZ); POPEXCX(t); return [t];
+}
+:rte^"/l" POPLIST4_1_48 is exrvalid=0 & u1_15_3=0xac6 & POPLIST4_1_48
 {
 	local t:$(ASZ); POPEXC(t); return [t];
+}
+:rte^"/l" POPLIST4_1_48 is exrvalid=1 & u1_15_3=0xac6 & POPLIST4_1_48
+{
+	local t:$(ASZ); POPEXCX(t); return [t];
 }
 :rts  is u1_15_0=0x5470
 {
@@ -66706,12 +66734,12 @@ PUSHLIST4_2_51: "er4-er7" is u2_2_0=4 { er7 = er7 - 4; local s4:$(ASZ); DEA(s4, 
 :stmac "mach"^","^u1_rl2_0 is u1_15_3=0x44 & u1_rl2_0
 {
 	u1_rl2_0 = mach;
-	N = mac s< 0; Z = mac == 0; V = macv;
+	N = macn; Z = macz; V = macv;
 }
 :stmac "macl"^","^u1_rl2_0 is u1_15_3=0x46 & u1_rl2_0
 {
 	u1_rl2_0 = macl;
-	N = mac s< 0; Z = mac == 0; V = macv;
+	N = macn; Z = macz; V = macv;
 }
 :sub.b "#"^u2_7_0^","^"@"^u1_ra6_4 is u1_15_7=0xfa & u1_3_0=0x0 & u1_ra6_4 ; u2_15_8=0xa1 & u2_7_0
 {
@@ -78572,9 +78600,13 @@ PUSHLIST4_2_51: "er4-er7" is u2_2_0=4 { er7 = er7 - 4; local s4:$(ASZ); DEA(s4, 
 	V = 0;
 	*:1 ea0 = a | 0x80;
 }
-:trapa "#"^u1_5_4 is u1_15_6=0x15c & u1_3_0=0x0 & u1_5_4
+:trapa "#"^u1_5_4 is exrvalid=0 & u1_15_6=0x15c & u1_3_0=0x0 & u1_5_4
 {
 	local t:$(ASZ); TRAPVEC(t, u1_5_4); PUSHEXC(inst_next); I = 1; call [t];
+}
+:trapa "#"^u1_5_4 is exrvalid=1 & u1_15_6=0x15c & u1_3_0=0x0 & u1_5_4
+{
+	local t:$(ASZ); TRAPVEC(t, u1_5_4); PUSHEXCX(inst_next); I = 1; call [t];
 }
 :xor.b "#"^u1_7_0^","^u1_rb11_8 is u1_15_12=0xd & u1_7_0 & u1_rb11_8
 {
