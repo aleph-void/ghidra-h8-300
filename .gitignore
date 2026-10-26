@@ -2,3 +2,5 @@
 /dist
 *.sla
 .gradle
+/lib/*.jar
+__pycache__/
