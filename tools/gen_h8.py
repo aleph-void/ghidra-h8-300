@@ -865,14 +865,15 @@ def build(core, gen, row):
         n, m = res
         B.append('local p:4 = sext(%s) * sext(%s); MACACC(p);' % (n['rd'], m['rd']))
     elif base == 'CLRMAC':
-        B.append('mac = 0; macv = 0;')
+        B.append('mac = 0; macv = 0; macn = 0; macz = 1;')
     elif base == 'LDMAC':
         s, c = res
         if c['creg'] == 'mach':
             B.append('mach = (%s << 22) s>> 22;' % s['rd'])
         else:
             B.append('macl = %s;' % s['rd'])
-        B.append('macv = 0;')
+        # N-MULT and Z-MULT describe the MAC contents, which STMAC reports
+        B.append('macv = 0; macn = mac s< 0; macz = mac == 0;')
     elif base == 'STMAC':
         c, d = res
         B.append('%s = %s;' % (d['reg'], c['creg']))

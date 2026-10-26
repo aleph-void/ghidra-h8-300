@@ -977,7 +977,7 @@ PUSHLIST4_2_19: "er4-er7" is u2_2_0=4 { er7 = er7 - 4; local s4:$(ASZ); DEA(s4, 
 }
 :clrmac  is u1_15_0=0x1a0
 {
-	mac = 0; macv = 0;
+	mac = 0; macv = 0; macn = 0; macz = 1;
 }
 :cmp.b "#"^u1_7_0^","^u1_rb11_8 is u1_15_12=0xa & u1_7_0 & u1_rb11_8
 {
@@ -1332,12 +1332,12 @@ PUSHLIST4_2_19: "er4-er7" is u2_2_0=4 { er7 = er7 - 4; local s4:$(ASZ); DEA(s4, 
 :ldmac u1_rl2_0^","^"mach" is u1_15_3=0x64 & u1_rl2_0
 {
 	mach = (u1_rl2_0 << 22) s>> 22;
-	macv = 0;
+	macv = 0; macn = mac s< 0; macz = mac == 0;
 }
 :ldmac u1_rl2_0^","^"macl" is u1_15_3=0x66 & u1_rl2_0
 {
 	macl = u1_rl2_0;
-	macv = 0;
+	macv = 0; macn = mac s< 0; macz = mac == 0;
 }
 :mac "@"^u2_ra6_4^"+"^","^"@"^u2_ra2_0^"+" is macsat=0 & u1_15_0=0x160 ; u2_15_7=0xda & u2_3_3=0x0 & u2_ra2_0 & u2_ra6_4
 {
